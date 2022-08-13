@@ -36,6 +36,8 @@ class YTVOSDataset:
         for idx, vid_info in enumerate(self.vid_infos):
             for frame_id in range(len(vid_info['filenames'])):
                 self.img_ids.append((idx, frame_id))
+        self.mapped_classes = self.ytvos.cats
+
     def __len__(self):
         return len(self.img_ids)
 
@@ -46,7 +48,7 @@ class YTVOSDataset:
         vid_len = len(self.vid_infos[vid]['file_names'])
         inds = list(range(self.num_frames))
         inds = [i%vid_len for i in inds][::-1]
-        # if random 
+        # if random
         # random.shuffle(inds)
         for j in range(self.num_frames):
             img_path = os.path.join(str(self.img_folder), self.vid_infos[vid]['file_names'][frame_id-inds[j]])
@@ -135,7 +137,7 @@ class ConvertCocoPolysToMask(object):
         target["image_id"] = image_id
 
         # for conversion to coco api
-        area = torch.tensor(area) 
+        area = torch.tensor(area)
         iscrowd = torch.tensor(iscrowd)
         target["valid"] = torch.tensor(valid)
         target["area"] = area
@@ -179,12 +181,12 @@ def make_coco_transforms(image_set):
 
 
 def build(image_set, args):
-    root = Path(args.ytvos_path)
+    root = Path(args.dataset_path)
     assert root.exists(), f'provided YTVOS path {root} does not exist'
     mode = 'instances'
     PATHS = {
-        "train": (root / "train/JPEGImages", root / "annotations" / f'{mode}_train_sub.json'),
-        "val": (root / "valid/JPEGImages", root / "annotations" / f'{mode}_val_sub.json'),
+        "train": (root / "train/JPEGImages", root / "annotations" / f'train.json'),
+        "val": (root / "valid/JPEGImages", root / "annotations" / f'valid.json'),
     }
     img_folder, ann_file = PATHS[image_set]
     dataset = YTVOSDataset(img_folder, ann_file, transforms=make_coco_transforms(image_set), return_masks=args.masks, num_frames = args.num_frames)

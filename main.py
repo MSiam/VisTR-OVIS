@@ -85,7 +85,7 @@ def get_args_parser():
 
     # dataset parameters
     parser.add_argument('--dataset_file', default='ytvos')
-    parser.add_argument('--ytvos_path', type=str)
+    parser.add_argument('--dataset_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
 
     parser.add_argument('--output_dir', default='r101_vistr',
@@ -154,13 +154,13 @@ def main(args):
                                    collate_fn=utils.collate_fn, num_workers=args.num_workers)
 
     output_dir = Path(args.output_dir)
-    
+
     # load coco pretrained weight
     checkpoint = torch.load(args.pretrained_weights, map_location='cpu')['model']
     del checkpoint["vistr.class_embed.weight"]
     del checkpoint["vistr.class_embed.bias"]
     del checkpoint["vistr.query_embed.weight"]
-    model.module.load_state_dict(checkpoint,strict=False)
+    model_without_ddp.load_state_dict(checkpoint,strict=False)
 
     if args.resume:
         if args.resume.startswith('https'):
